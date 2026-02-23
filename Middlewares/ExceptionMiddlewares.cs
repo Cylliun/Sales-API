@@ -1,43 +1,45 @@
 ﻿using System.Net;
 using System.Text.Json;
 
-namespace SalesApi.Middlewares
+namespace SalesApi.Middlewares;
+
+public class ExceptionMiddlewares
 {
-    public class ExceptionMiddlewares
+    private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionMiddlewares> _logger;
+
+    public ExceptionMiddlewares(RequestDelegate next, ILogger<ExceptionMiddlewares> logger)
     {
-        private readonly RequestDelegate _next;
-
-        public ExceptionMiddlewares(RequestDelegate next)
-        {
-            _next = next;
-        }
-
-        public async Task InvokeAsync(HttpContext context)
-        {
-            try
-            {
-                await _next(context);
-            }
-
-            catch (AppException ex)
-            {
-                context.Response.StatusCode = 400;
-                await context.Response.WriteAsJsonAsync(new
-                    {
-                        error = ex.Message,
-                    });
-            }
-
-            catch (Exception)
-            {
-                context.Response.StatusCode = 500;
-                await context.Response.WriteAsJsonAsync(new
-                    {
-                        error = "Um erro inesperado ocorreu.",
-                    });
-            }
-
-        }
-
+        _next = next;
+        _logger = logger;
     }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+
+        try
+        {
+            await _next(context);
+        } 
+        catch (AppException ex)
+        {
+            context.Response.StatusCode = ex.StatusCode;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                message = ex.Message,
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unhandled exception occurred.");
+
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = "An unexpected error occurred. Please try again later."
+            });
+
+        }
+
+}
 }
