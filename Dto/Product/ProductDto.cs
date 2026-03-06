@@ -1,4 +1,4 @@
-﻿namespace SalesApi.Dto;
+﻿namespace SalesApi.Dto.Product;
 
 public class ProductDto
 {

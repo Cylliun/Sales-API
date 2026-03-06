@@ -1,7 +1,8 @@
-﻿namespace SalesApi.Dto
+﻿namespace SalesApi.Dto.Product
 {
-    public class CreateProductDto
+    public class UpdateProductDto
     {
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public decimal Price { get; set; }
     }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesApi.Data;
-using SalesApi.Dto;
+using SalesApi.Dto.Product;
 using SalesApi.Models;
 
 namespace SalesApi.Services;
