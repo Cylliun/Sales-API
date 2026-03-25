@@ -14,9 +14,9 @@ public class ProductServices
         _context = context;
     }
 
-    public async Task<Product> CreateProduct(CreateProductDto dto)
+    public async Task<Product> CreateProduct(CreateProductDto dto, int userId)
     {
-        var product = new Product(dto.Name, dto.Price);
+        var product = new Product(dto.Name, dto.Price, dto.Stock, userId);
 
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
@@ -24,9 +24,11 @@ public class ProductServices
         return product;
     }
 
-    public async Task<List<Product>> GetFilteredAsync(string? name, int page, int pageSize)
+    public async Task<List<Product>> GetFilteredAsync(string? name, int page, int pageSize, int userId)
     {
-        var query = _context.Products.AsQueryable();
+
+        var query = _context.Products
+            .Where(p => p.UserId ==userId);
 
         if (!string.IsNullOrWhiteSpace(name))
             query = query.Where(p => p.Name.Contains(name));
@@ -38,11 +40,10 @@ public class ProductServices
         return await query.ToListAsync();
     }
 
-    public async Task<Product?> GetProductByIdAsync(int id)
+    public async Task<Product?> GetProductByIdAsync(int id, int userId)
     {
         var product = await _context.Products
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .FirstOrDefaultAsync(p => p.Id == id && p.UserId ==userId);
         return product;
     }
 

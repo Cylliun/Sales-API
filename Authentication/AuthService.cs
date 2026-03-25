@@ -33,6 +33,7 @@ public class AuthService
     {
         var claims = new List<Claim>
         {
+            new Claim(ClaimTypes.NameIdentifier,userId),
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(ClaimTypes.Role, role),

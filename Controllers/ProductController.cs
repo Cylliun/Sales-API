@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using SalesApi.Dto.Product;
 using SalesApi.Services;
+using System.Security.Claims;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ProductController : Controller
@@ -15,17 +17,20 @@ public class ProductController : Controller
 
 
     [HttpGet]
-    [Authorize]
     public async Task<ActionResult> GetProducts([FromQuery] string? name, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var products = await _productServices.GetFilteredAsync(name, page, pageSize);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var products = await _productServices.GetFilteredAsync(name, page, pageSize, userId);
         return Ok(products);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetProductById(int id)
     {
-        var product = await _productServices.GetProductByIdAsync(id);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var product = await _productServices.GetProductByIdAsync(id, userId);
         return Ok(product);
     }
 
@@ -38,14 +43,16 @@ public class ProductController : Controller
      }
 
     [HttpPost]
-    [Authorize]
     public async Task<ActionResult> CreateProduct([FromBody] CreateProductDto dto)
-     {
-         var product = await _productServices.CreateProduct(dto);
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var product = await _productServices.CreateProduct(dto, userId);
+
         return Ok(product);
     }
 
-     [HttpPut]
+    [HttpPut]
      public async Task<ActionResult> UpdateProduct([FromBody] UpdateProductDto dto)
      {
          var product = await _productServices.UpdateProductAsync(dto.Id, dto);
