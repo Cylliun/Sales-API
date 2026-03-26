@@ -11,7 +11,7 @@ public class Product
     public User User { get; private set; }
 
 
-    private Product() { } // necessário para o Entity Framework
+    private Product() { }
 
     public Product(string name, decimal price, int stock, int userId)
     {

@@ -6,6 +6,7 @@ using System.Security.Claims;
 
 namespace SalesApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class SalesController : ControllerBase
@@ -49,6 +50,6 @@ public class SalesController : ControllerBase
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
         var result = await _saleServices.CancelSale(id, userId);
-        return NoContent();
+        return Ok(result);
     }
 }

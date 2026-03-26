@@ -12,8 +12,8 @@ using SalesApi.Data;
 namespace SalesApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260316153453_FixSalesProductTable")]
-    partial class FixSalesProductTable
+    [Migration("20260326012033_InicialClean")]
+    partial class InicialClean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,35 +25,7 @@ namespace SalesApi.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SalesApi.Models.Product", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("SalesApi.Models.Sale", b =>
+            modelBuilder.Entity("Sale", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,7 +52,7 @@ namespace SalesApi.Migrations
                     b.ToTable("Sales");
                 });
 
-            modelBuilder.Entity("SalesApi.Models.SalesItem", b =>
+            modelBuilder.Entity("SalesApi.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,25 +60,29 @@ namespace SalesApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SalesId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPrice")
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("SalesId");
+                    b.HasIndex("UserId1");
 
-                    b.ToTable("SalesItems");
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("SalesApi.Models.User", b =>
@@ -136,44 +112,81 @@ namespace SalesApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("SalesApi.Models.Product", b =>
+            modelBuilder.Entity("SalesItem", b =>
                 {
-                    b.HasOne("SalesApi.Models.User", null)
-                        .WithMany("Product")
-                        .HasForeignKey("UserId");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("SalesItems");
                 });
 
-            modelBuilder.Entity("SalesApi.Models.Sale", b =>
+            modelBuilder.Entity("Sale", b =>
                 {
                     b.HasOne("SalesApi.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SalesApi.Models.SalesItem", b =>
+            modelBuilder.Entity("SalesApi.Models.Product", b =>
+                {
+                    b.HasOne("SalesApi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SalesApi.Models.User", null)
+                        .WithMany("Product")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SalesItem", b =>
                 {
                     b.HasOne("SalesApi.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SalesApi.Models.Sale", "Sales")
+                    b.HasOne("Sale", "Sale")
                         .WithMany("Items")
-                        .HasForeignKey("SalesId")
+                        .HasForeignKey("SaleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
 
-                    b.Navigation("Sales");
+                    b.Navigation("Sale");
                 });
 
-            modelBuilder.Entity("SalesApi.Models.Sale", b =>
+            modelBuilder.Entity("Sale", b =>
                 {
                     b.Navigation("Items");
                 });

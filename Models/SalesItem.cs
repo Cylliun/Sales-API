@@ -1,11 +1,15 @@
-﻿public class SalesItem
+﻿using SalesApi.Models;
+
+public class SalesItem
 {
     public int Id { get; private set; }
 
     public int ProductId { get; private set; }
+    public Product Product { get; private set; }
     public int Quantity { get; private set; }
     public decimal UnitPrice { get; private set; }
 
+    public int SaleId { get; private set; }
     public Sale Sale { get; private set; }
 
     private SalesItem() { }

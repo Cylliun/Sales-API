@@ -3,7 +3,6 @@
 public class Sale
 {
     public int Id { get; private set; }
-    public int UserId { get; private set; }
 
     public decimal TotalAmount { get; private set; }
     public bool IsCanceled { get; private set; }
@@ -11,6 +10,9 @@ public class Sale
     public DateTime CreatedAt { get; private set; }
 
     public List<SalesItem> Items { get; private set; }
+
+    public int UserId { get; private set; }
+    public User User { get; private set; }
 
     private Sale() { }
 

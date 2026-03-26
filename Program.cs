@@ -44,6 +44,8 @@ builder.Services.AddScoped<ProductServices>();
 
 builder.Services.AddScoped<UserServices>();
 
+builder.Services.AddScoped<SaleServices>();
+
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddOpenApi();

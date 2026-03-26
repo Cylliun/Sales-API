@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesApi.Data;
 using SalesApi.Dto.Sales;
+using SalesApi.Dto.SalesItem;
 using SalesApi.Models;
 using System.Net.ServerSentEvents;
 
@@ -13,7 +14,7 @@ public class SaleServices
     {
         _context = context;
     }
-    
+
     public async Task<Sale> CreateSale(CreateSalesDto dto, int userId)
     {
         if (dto.Items == null || !dto.Items.Any())
@@ -29,7 +30,7 @@ public class SaleServices
             .ToListAsync();
 
         if (products.Count != productIds.Count)
-            throw new Exception("One or more products do not exist.");
+            throw new Exception("Invalid products.");
 
         var sale = new Sale(userId);
 
@@ -58,51 +59,83 @@ public class SaleServices
         return sale;
     }
 
-    public async Task<Sale?> GetSalesByIdAsync(int id, int userId)
+    public async Task<SalesDto> GetSalesByIdAsync(int id, int userId)
     {
         var sale = await _context.Sales
+            .Where(s => s.Id == id && s.UserId == userId)
             .Include(s => s.Items)
-            .ThenInclude(i => i.ProductId)
-            .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
+            .ThenInclude(i => i.Product)
+            .Select(s => new SalesDto
+            {
+                Id = s.Id,
+                TotalAmount = s.TotalAmount,
+                CreatedAt = s.CreatedAt,
+                Items = s.Items.Select(i => new SaleItemDto
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    SubTotal = i.CalculateSubTotal()
+                }).ToList()
+            })
+        .FirstOrDefaultAsync();
 
         if (sale == null)
-            throw new KeyNotFoundException("Sale not found.");
+            throw new KeyNotFoundException("Sales not found");
+        
 
         return sale;
+
     }
 
-    public async Task<List<Sale>> GetSales(int userId)
+    public async Task<List<SalesDto>> GetSales(int userId)
     {
-        var sale = await _context.Sales
+        return await _context.Sales
             .Where(s => s.UserId == userId)
-            .OrderByDescending(s => s.CreatedAt)
-            .ToListAsync();
+            .Include(s => s.Items)
+            .ThenInclude(i => i.Product)
+            .Select(s => new SalesDto
+            {
+                Id = s.Id,
+                TotalAmount = s.TotalAmount,
+                CreatedAt = s.CreatedAt,
+                Items = s.Items.Select(i => new SaleItemDto
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    SubTotal = i.CalculateSubTotal()
+                }).ToList()
+            })
+        .ToListAsync();
 
-        if (sale.Count == 0)
-            throw new KeyNotFoundException("Sale not found");
-
-        return sale;
-    } 
+    }
 
     public async Task<Sale> CancelSale(int id, int userId)
     {
         var sale = await _context.Sales
             .Include(s => s.Items)
+            .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
+
         if (sale == null)
             throw new KeyNotFoundException("Sale not found.");
+
         if (sale.IsCanceled)
             throw new InvalidOperationException("Sale is already canceled.");
+
         sale.Cancel();
+
         foreach (var item in sale.Items)
         {
-            var product = await _context.Products.FindAsync(item.ProductId);
-            if (product != null)
-            {
-                product.IncreaseStock(item.Quantity);
-            }
+            if (item.Product == null)
+                throw new Exception("Product not found.");
+
+            item.Product.IncreaseStock(item.Quantity);
         }
+
         await _context.SaveChangesAsync();
+
         return sale;
     }
 
