@@ -25,4 +25,4 @@ Projeto focado em cadastro de produtos e registrar venda com base em todos os pr
 ## Contato
 
 Eiji Guilherme Oliveira Taguchi - eijitaguchijob@gmail.com
-Link do Projeto: [https://github.com/Cylliun/ToDoList](https://github.com/Cylliun/ToDoList)
+Link do Projeto: [https://github.com/Cylliun/ToDoList](https://github.com/Cylliun/Sales-API)
